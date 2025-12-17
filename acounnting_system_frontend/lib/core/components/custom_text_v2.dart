@@ -1,0 +1,37 @@
+// ignore_for_file: must_be_immutable
+
+import 'package:flutter/material.dart';
+import '../styles/text_styles.dart';
+
+class CustomText extends StatelessWidget {
+  CustomText(
+      this.text, {
+        super.key,
+        this.style ,
+        this.textAlign = TextAlign.center,
+        this.softWrap = true,
+        this.overflow ,
+        this.maxLines,
+      }){
+    style?? AppTextStyles.mainStyle();
+  }
+  String text;
+  TextStyle? style;
+  int? maxLines;
+  TextAlign textAlign;
+  bool softWrap;
+  TextOverflow? overflow;
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: style,
+      maxLines: maxLines,
+      textAlign: textAlign,
+      overflow: overflow,
+      softWrap: softWrap,
+    );
+  }
+}

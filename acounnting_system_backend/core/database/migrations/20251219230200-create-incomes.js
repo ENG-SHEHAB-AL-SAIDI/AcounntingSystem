@@ -26,10 +26,10 @@ module.exports = {
         allowNull: true
       },
 
-      customerId: {
+      contactId: {
         type: Sequelize.UUID,
         allowNull: true,
-        references: { model: 'customers', key: 'id' },
+        references: { model: 'contacts', key: 'id' },
         onUpdate: 'CASCADE',
         onDelete: 'SET NULL'
       },

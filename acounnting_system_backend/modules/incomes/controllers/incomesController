@@ -1,59 +1,121 @@
 'use strict';
 
 const incomeService = require('../services/incomeService');
+const AppError = require('../../../utils/appError');
 
-async function createIncome(req, res) {
-  try {
-    const income = await incomeService.createIncome(req.body);
-    res.json(income);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
+class IncomeController {
+  async createIncome(req, res, next) {
+    try {
+      const income = await incomeService.createIncome(req.body);
+      res.status(201).json(income);
+    } catch (error) {
+      // Wrap non-AppError in AppError
+      if (!(error instanceof AppError)) {
+        return next(
+          new AppError({
+            model: 'Income',
+            action: 'create',
+            statusCode: 400,
+            message: 'Failed to create income',
+            meta: error.errors || error.message
+          })
+        );
+      }
+      next(error);
+    }
+  }
+
+  async getIncomes(req, res, next) {
+    try {
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const result = await incomeService.getPaginatedIncomes({ page, limit });
+      res.json(result);
+    } catch (error) {
+      if (!(error instanceof AppError)) {
+        return next(
+          new AppError({
+            model: 'Income',
+            action: 'list',
+            statusCode: 500,
+            message: 'Failed to list incomes',
+            meta: error.errors || error.message
+          })
+        );
+      }
+      next(error);
+    }
+  }
+
+  async getIncomeById(req, res, next) {
+    try {
+      const income = await incomeService.getIncomeById(req.params.id);
+      if (!income) {
+        return next(
+          new AppError({
+            model: 'Income',
+            action: 'read',
+            statusCode: 404,
+            message: 'Income not found'
+          })
+        );
+      }
+      res.json(income);
+    } catch (error) {
+      if (!(error instanceof AppError)) {
+        return next(
+          new AppError({
+            model: 'Income',
+            action: 'read',
+            statusCode: 500,
+            message: 'Failed to get income',
+            meta: error.errors || error.message
+          })
+        );
+      }
+      next(error);
+    }
+  }
+
+  async updateIncome(req, res, next) {
+    try {
+      const income = await incomeService.updateIncome(req.params.id, req.body);
+      res.json(income);
+    } catch (error) {
+      if (!(error instanceof AppError)) {
+        return next(
+          new AppError({
+            model: 'Income',
+            action: 'update',
+            statusCode: 400,
+            message: 'Failed to update income',
+            meta: error.errors || error.message
+          })
+        );
+      }
+      next(error);
+    }
+  }
+
+  async deleteIncome(req, res, next) {
+    try {
+      await incomeService.deleteIncome(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      if (!(error instanceof AppError)) {
+        return next(
+          new AppError({
+            model: 'Income',
+            action: 'delete',
+            statusCode: 400,
+            message: 'Failed to delete income',
+            meta: error.errors || error.message
+          })
+        );
+      }
+      next(error);
+    }
   }
 }
 
-async function getIncomes(req, res) {
-  try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const result = await incomeService.getPaginatedIncomes({ page, limit });
-    res.json(result);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-}
-
-async function getIncomeById(req, res) {
-  try {
-    const income = await incomeService.getIncomeById(req.params.id);
-    if (!income) return res.status(404).json({ error: 'Income not found' });
-    res.json(income);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-}
-
-async function updateIncome(req, res) {
-  try {
-    const income = await incomeService.updateIncome(req.params.id, req.body);
-    res.json(income);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-}
-
-async function deleteIncome(req, res) {
-  try {
-    await incomeService.deleteIncome(req.params.id);
-    res.json({ message: 'Income deleted' });
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-}
-
-module.exports = {
-  createIncome,
-  getIncomes,
-  getIncomeById,
-  updateIncome,
-  deleteIncome
-};
+module.exports = new IncomeController();

@@ -1,44 +1,100 @@
 'use strict';
+
 const { Income } = require('../models/income.model');
 const eventBus = require('../../core/helpers/eventBus');
-const customerService = require('../../customer/services/customerService');
+const { Contact } = require('../../customer/models/contact.model');
+const AppError = require('../../../utils/appError');
 
 async function createIncome(data) {
-  if (data.customerId) {
-    const exists = await customerService.validateCustomer(data.customerId);
-    if (!exists) throw new Error('Customer not found');
+  const { contactId } = data;
+
+  if (contactId) {
+    const contact = await Contact.findByPk(contactId);
+    if (!contact || !contact.isCustomer) {
+      throw new AppError({
+        model: 'Income',
+        action: 'create',
+        statusCode: 400,
+        message: 'Selected contact is not a customer'
+      });
+    }
   }
 
-  const income = await Income.create(data);
+  try {
+    const income = await Income.create(data);
 
-  // Emit event for GL to listen
-  eventBus.emit('incomeCreated', income);
+    // Emit event for GL
+    eventBus.emit('incomeCreated', income);
 
-  return income;
+    return income;
+  } catch (err) {
+    throw new AppError({
+      model: 'Income',
+      action: 'create',
+      statusCode: 400,
+      message: 'Failed to create income',
+      meta: err.errors || err.message
+    });
+  }
 }
 
 async function updateIncome(id, data) {
   const income = await Income.findByPk(id);
-  if (!income) throw new Error('Income not found');
+  if (!income) {
+    throw new AppError({
+      model: 'Income',
+      action: 'update',
+      statusCode: 404,
+      message: 'Income not found'
+    });
+  }
 
   const oldIncome = { ...income.dataValues }; // copy for GL reversal
-  await income.update(data);
 
-  // Emit event for GL to handle reversal and new entry
-  eventBus.emit('incomeUpdated', { oldIncome, newIncome: income });
+  try {
+    await income.update(data);
 
-  return income;
+    // Emit event for GL to handle reversal and new entry
+    eventBus.emit('incomeUpdated', { oldIncome, newIncome: income });
+
+    return income;
+  } catch (err) {
+    throw new AppError({
+      model: 'Income',
+      action: 'update',
+      statusCode: 400,
+      message: 'Failed to update income',
+      meta: err.errors || err.message
+    });
+  }
 }
 
 async function deleteIncome(id) {
   const income = await Income.findByPk(id);
-  if (!income) throw new Error('Income not found');
+  if (!income) {
+    throw new AppError({
+      model: 'Income',
+      action: 'delete',
+      statusCode: 404,
+      message: 'Income not found'
+    });
+  }
 
-  // Emit event for GL to post reversing entry
-  eventBus.emit('incomeDeleted', income);
+  try {
+    // Emit event for GL to post reversing entry
+    eventBus.emit('incomeDeleted', income);
 
-  await income.destroy();
-  return true;
+    await income.destroy();
+    return true;
+  } catch (err) {
+    throw new AppError({
+      model: 'Income',
+      action: 'delete',
+      statusCode: 500,
+      message: 'Failed to delete income',
+      meta: err.errors || err.message
+    });
+  }
 }
 
 module.exports = {

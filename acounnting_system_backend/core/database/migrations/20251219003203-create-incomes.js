@@ -3,7 +3,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable("incomes", {
+    await queryInterface.createTable('incomes', {
       id: {
         type: Sequelize.UUID,
         allowNull: false,
@@ -28,7 +28,10 @@ module.exports = {
 
       customerId: {
         type: Sequelize.UUID,
-        allowNull: true
+        allowNull: true,
+        references: { model: 'customers', key: 'id' },
+        onUpdate: 'CASCADE',
+        onDelete: 'SET NULL'
       },
 
       paymentMethod: {
@@ -46,6 +49,22 @@ module.exports = {
         allowNull: true
       },
 
+      paymentAccountId: {
+        type: Sequelize.UUID,
+        allowNull: false,
+        references: { model: 'accounts', key: 'id' },
+        onUpdate: 'CASCADE',
+        onDelete: 'RESTRICT'
+      },
+
+      revenueAccountId: {
+        type: Sequelize.UUID,
+        allowNull: false,
+        references: { model: 'accounts', key: 'id' },
+        onUpdate: 'CASCADE',
+        onDelete: 'RESTRICT'
+      },
+
       createdAt: {
         type: Sequelize.DATE,
         allowNull: false
@@ -56,10 +75,13 @@ module.exports = {
         allowNull: false
       }
     });
+
+    // Optional indexes
+    await queryInterface.addIndex('incomes', ['date']);
+    await queryInterface.addIndex('incomes', ['customerId']);
   },
 
   down: async (queryInterface) => {
-    await queryInterface.dropTable("incomes");
+    await queryInterface.dropTable('incomes');
   }
 };
-

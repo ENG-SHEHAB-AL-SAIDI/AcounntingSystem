@@ -1,0 +1,59 @@
+'use strict';
+
+const incomeService = require('../services/incomeService');
+
+async function createIncome(req, res) {
+  try {
+    const income = await incomeService.createIncome(req.body);
+    res.json(income);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+}
+
+async function getIncomes(req, res) {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const result = await incomeService.getPaginatedIncomes({ page, limit });
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+async function getIncomeById(req, res) {
+  try {
+    const income = await incomeService.getIncomeById(req.params.id);
+    if (!income) return res.status(404).json({ error: 'Income not found' });
+    res.json(income);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+async function updateIncome(req, res) {
+  try {
+    const income = await incomeService.updateIncome(req.params.id, req.body);
+    res.json(income);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+}
+
+async function deleteIncome(req, res) {
+  try {
+    await incomeService.deleteIncome(req.params.id);
+    res.json({ message: 'Income deleted' });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+}
+
+module.exports = {
+  createIncome,
+  getIncomes,
+  getIncomeById,
+  updateIncome,
+  deleteIncome
+};

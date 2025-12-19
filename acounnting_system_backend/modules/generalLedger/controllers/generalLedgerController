@@ -1,0 +1,16 @@
+'use strict';
+
+const generalLedgerService = require('../services/generalLedgerService');
+
+async function postEntry(req, res) {
+  try {
+    const entry = await generalLedgerService.postJournalEntry(req.body);
+    res.json(entry);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+}
+
+module.exports = {
+  postEntry
+};

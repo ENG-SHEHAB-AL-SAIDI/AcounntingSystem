@@ -2,40 +2,65 @@
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-  class journalEntry extends Model {
+  class JournalEntry extends Model {
     static associate(models) {
-      journalEntry.hasMany(models.journalLine, { foreignKey: 'journalEntryId' });
+      // Each entry has many lines
+      JournalEntry.hasMany(models.JournalLine, {
+        foreignKey: 'journalEntryId',
+        as: 'lines',
+      });
+
+      // Multi-tenant support
+      JournalEntry.belongsTo(models.Business, {
+        foreignKey: 'businessId',
+      });
     }
   }
 
-  journalEntry.init(
+  JournalEntry.init(
     {
       id: {
         type: DataTypes.UUID,
         allowNull: false,
         primaryKey: true,
-        defaultValue: DataTypes.UUIDV4
+        defaultValue: DataTypes.UUIDV4,
       },
+
+      businessId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+      },
+
       date: {
         type: DataTypes.DATEONLY,
-        allowNull: false
+        allowNull: false,
       },
+
       reference: {
         type: DataTypes.STRING,
-        allowNull: true
+        allowNull: false,
       },
+
       description: {
         type: DataTypes.TEXT,
-        allowNull: true
-      }
+        allowNull: true,
+      },
+
+      createdAt: {
+        allowNull: false,
+        type: DataTypes.DATE,
+      },
+
+      updatedAt: {
+        allowNull: false,
+        type: DataTypes.DATE,
+      },
     },
     {
       sequelize,
-      modelName: 'journalEntry',
-      tableName: 'journalEntries',
-      timestamps: true
+      modelName: 'JournalEntry',
     }
   );
 
-  return journalEntry;
+  return JournalEntry;
 };

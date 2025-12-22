@@ -2,46 +2,70 @@
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-  class account extends Model {
+  class Account extends Model {
     static associate(models) {
-      account.hasMany(models.journalLine, { foreignKey: 'accountId' });
+      // Each account belongs to a business
+      Account.belongsTo(models.Business, {
+        foreignKey: 'businessId',
+      });
+
+      // An account can have many journal lines
+      Account.hasMany(models.JournalLine, {
+        foreignKey: 'accountId',
+      });
     }
   }
 
-  account.init(
+  Account.init(
     {
       id: {
         type: DataTypes.UUID,
         allowNull: false,
         primaryKey: true,
-        defaultValue: DataTypes.UUIDV4
+        defaultValue: DataTypes.UUIDV4,
       },
-      name: {
-        type: DataTypes.STRING,
+
+      businessId: {
+        type: DataTypes.UUID,
         allowNull: false,
-        unique: true
       },
-      type: {
-        type: DataTypes.ENUM('Asset', 'Liability', 'Equity', 'Revenue', 'Expense'),
-        allowNull: false
+
+      name: {
+        type: DataTypes.STRING(100),
+        allowNull: false,
       },
+
       code: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(20),
         allowNull: true,
-        unique: true
+        unique: true,
       },
+
+      type: {
+        type: DataTypes.ENUM('asset', 'liability', 'equity', 'revenue', 'expense'),
+        allowNull: false,
+      },
+
       description: {
         type: DataTypes.TEXT,
-        allowNull: true
-      }
+        allowNull: true,
+      },
+
+      createdAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
+      },
+
+      updatedAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
+      },
     },
     {
       sequelize,
-      modelName: 'account',
-      tableName: 'accounts',
-      timestamps: true
+      modelName: 'Account',
     }
   );
 
-  return account;
+  return Account;
 };

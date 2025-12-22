@@ -1,87 +1,100 @@
-'use strict';
+"use strict";
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('incomes', {
+    await queryInterface.createTable("incomes", {
       id: {
         type: Sequelize.UUID,
         allowNull: false,
         primaryKey: true,
-        defaultValue: Sequelize.UUIDV4
+        defaultValue: Sequelize.UUIDV4,
+      },
+      businessId: {
+        type: Sequelize.UUID,
+        allowNull: false,
       },
 
       date: {
         type: Sequelize.DATEONLY,
-        allowNull: false
+        allowNull: false,
       },
 
       amount: {
         type: Sequelize.DECIMAL(12, 2),
-        allowNull: false
+        allowNull: false,
       },
 
       source: {
         type: Sequelize.STRING,
-        allowNull: true
+        allowNull: true,
       },
 
       contactId: {
         type: Sequelize.UUID,
         allowNull: true,
-        references: { model: 'contacts', key: 'id' },
-        onUpdate: 'CASCADE',
-        onDelete: 'SET NULL'
+        references: { model: "contacts", key: "id" },
+        onUpdate: "CASCADE",
+        onDelete: "SET NULL",
       },
 
       paymentMethod: {
         type: Sequelize.STRING,
-        allowNull: true
+        allowNull: true,
       },
 
       attachment: {
         type: Sequelize.STRING,
-        allowNull: true
+        allowNull: true,
       },
 
       notes: {
         type: Sequelize.TEXT,
-        allowNull: true
+        allowNull: true,
       },
 
       paymentAccountId: {
         type: Sequelize.UUID,
         allowNull: false,
-        references: { model: 'accounts', key: 'id' },
-        onUpdate: 'CASCADE',
-        onDelete: 'RESTRICT'
+        references: { model: "accounts", key: "id" },
+        onUpdate: "CASCADE",
+        onDelete: "RESTRICT",
       },
 
       revenueAccountId: {
         type: Sequelize.UUID,
         allowNull: false,
-        references: { model: 'accounts', key: 'id' },
-        onUpdate: 'CASCADE',
-        onDelete: 'RESTRICT'
+        references: { model: "accounts", key: "id" },
+        onUpdate: "CASCADE",
+        onDelete: "RESTRICT",
       },
 
       createdAt: {
         type: Sequelize.DATE,
-        allowNull: false
+        allowNull: false,
+      },
+      createdByUserId: {
+        type: Sequelize.UUID,
+        allowNull: false,
       },
 
       updatedAt: {
         type: Sequelize.DATE,
-        allowNull: false
-      }
+        allowNull: false,
+      },
+      updatedByUserId: {
+        type: Sequelize.UUID,
+        allowNull: false,
+      },
     });
 
     // Optional indexes
-    await queryInterface.addIndex('incomes', ['date']);
-    await queryInterface.addIndex('incomes', ['customerId']);
+    await queryInterface.addIndex("incomes", ["date"]);
+    await queryInterface.addIndex("incomes", ["contactId"]);
+    await queryInterface.addIndex("incomes", ["businessId"]);
   },
 
   down: async (queryInterface) => {
-    await queryInterface.dropTable('incomes');
-  }
+    await queryInterface.dropTable("incomes");
+  },
 };

@@ -8,6 +8,11 @@ module.exports = {
         primaryKey: true,
         allowNull: false
       },
+      businessId: {
+  type: Sequelize.UUID,
+  allowNull: false
+},
+
       date: {
         type: Sequelize.DATEONLY,
         allowNull: false
@@ -29,6 +34,7 @@ module.exports = {
         allowNull: false
       }
     });
+    await queryInterface.addIndex("journal_entries", ["businessId"]);
   },
   async down(queryInterface) {
     await queryInterface.dropTable('journal_entries');

@@ -2,63 +2,81 @@
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-  class journalLine extends Model {
+  class JournalLine extends Model {
     static associate(models) {
-      journalLine.belongsTo(models.journalEntry, { foreignKey: 'journalEntryId' });
-      journalLine.belongsTo(models.account, { foreignKey: 'accountId' });
+      // Each line belongs to a journal entry
+      JournalLine.belongsTo(models.JournalEntry, {
+        foreignKey: 'journalEntryId',
+      });
+
+      // Each line belongs to an account (payment or revenue)
+      JournalLine.belongsTo(models.Account, {
+        foreignKey: 'accountId',
+      });
+
+      // Multi-tenant support
+      JournalLine.belongsTo(models.Business, {
+        foreignKey: 'businessId',
+      });
     }
   }
 
-  journalLine.init(
+  JournalLine.init(
     {
       id: {
         type: DataTypes.UUID,
         allowNull: false,
         primaryKey: true,
-        defaultValue: DataTypes.UUIDV4
+        defaultValue: DataTypes.UUIDV4,
       },
+
+      businessId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+      },
+
       journalEntryId: {
         type: DataTypes.UUID,
         allowNull: false,
-        references: {
-          model: 'journalEntries',
-          key: 'id'
-        },
-        onDelete: 'CASCADE',
-        onUpdate: 'CASCADE'
       },
+
       accountId: {
         type: DataTypes.UUID,
         allowNull: false,
-        references: {
-          model: 'accounts',
-          key: 'id'
-        },
-        onDelete: 'RESTRICT',
-        onUpdate: 'CASCADE'
       },
+
       debit: {
         type: DataTypes.DECIMAL(12, 2),
         allowNull: false,
-        defaultValue: 0
+        defaultValue: 0,
       },
+
       credit: {
         type: DataTypes.DECIMAL(12, 2),
         allowNull: false,
-        defaultValue: 0
+        defaultValue: 0,
       },
+
       notes: {
         type: DataTypes.TEXT,
-        allowNull: true
-      }
+        allowNull: true,
+      },
+
+      createdAt: {
+        allowNull: false,
+        type: DataTypes.DATE,
+      },
+
+      updatedAt: {
+        allowNull: false,
+        type: DataTypes.DATE,
+      },
     },
     {
       sequelize,
-      modelName: 'journalLine',
-      tableName: 'journalLines',
-      timestamps: true
+      modelName: 'JournalLine',
     }
   );
 
-  return journalLine;
+  return JournalLine;
 };

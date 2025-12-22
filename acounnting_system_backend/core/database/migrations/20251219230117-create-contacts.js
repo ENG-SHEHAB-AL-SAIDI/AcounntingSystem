@@ -11,6 +11,12 @@ module.exports = {
         defaultValue: Sequelize.UUIDV4
       },
 
+      businessId: {
+  type: Sequelize.UUID,
+  allowNull: false
+},
+
+
       name: {
         type: Sequelize.STRING(150),
         allowNull: false
@@ -58,6 +64,7 @@ module.exports = {
         allowNull: false
       }
     });
+    await queryInterface.addIndex("contacts", ["businessId"]);
   },
 
   down: async (queryInterface) => {

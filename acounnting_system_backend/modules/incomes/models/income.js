@@ -4,51 +4,101 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class Income extends Model {
     static associate(models) {
-      // Optional customer relationship
-      Income.belongsTo(models.Customer, { foreignKey: 'customerId' });
+      // Income belongs to business
+      Income.belongsTo(models.Business, {
+        foreignKey: 'businessId',
+      });
 
-      // Payment account (Cash, Bank, etc.)
-      Income.belongsTo(models.Account, { foreignKey: 'paymentAccountId', as: 'paymentAccount' });
+      // Income belongs to user (creator)
+      Income.belongsTo(models.User, {
+        foreignKey: 'createdByUserId',
+      });
+      
+      // Income belongs to payment account (cash, bank, etc.)
+      Income.belongsTo(models.Account, {
+        foreignKey: 'paymentAccountId',
+      });
 
-      // Revenue account (Sales, Service, etc.)
-      Income.belongsTo(models.Account, { foreignKey: 'revenueAccountId', as: 'revenueAccount' });
+      // Income belongs to revenue account
+      Income.belongsTo(models.Account, {
+        foreignKey: 'revenueAccountId',
+      });
+
+      // Income may belong to a customer/contact
+      Income.belongsTo(models.Contact, {
+        foreignKey: 'contactId',
+        allowNull: true,
+      });
     }
   }
 
   Income.init(
     {
-      id: { type: DataTypes.UUID, primaryKey: true, defaultValue: DataTypes.UUIDV4 },
-
-      date: { type: DataTypes.DATEONLY, allowNull: false },
-
-      amount: { type: DataTypes.DECIMAL(12, 2), allowNull: false },
-
-      source: { type: DataTypes.STRING, allowNull: true },
-
-      customerId: { type: DataTypes.UUID, allowNull: true },
-
-      paymentMethod: { type: DataTypes.STRING, allowNull: true },
-
-      attachment: { type: DataTypes.STRING, allowNull: true },
-
-      notes: { type: DataTypes.TEXT, allowNull: true },
-
-      // References payment account (asset)
-      paymentAccountId: {
+      id: {
+        allowNull: false,
+        primaryKey: true,
         type: DataTypes.UUID,
-        allowNull: false
+        defaultValue: DataTypes.UUIDV4,
       },
 
-      // References revenue account
+      businessId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+      },
+
+      createdByUserId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+      },
+
+      contactId: {
+        type: DataTypes.UUID,
+        allowNull: true,
+      },
+
+      date: {
+        type: DataTypes.DATEONLY,
+        allowNull: false,
+      },
+
+      amount: {
+        type: DataTypes.DECIMAL(12, 2),
+        allowNull: false,
+      },
+
+      paymentAccountId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+      },
+
       revenueAccountId: {
         type: DataTypes.UUID,
-        allowNull: false
-      }
+        allowNull: false,
+      },
+
+      attachment: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+
+      notes: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      },
+
+      createdAt: {
+        allowNull: false,
+        type: DataTypes.DATE,
+      },
+
+      updatedAt: {
+        allowNull: false,
+        type: DataTypes.DATE,
+      },
     },
     {
       sequelize,
       modelName: 'Income',
-      tableName: 'incomes'
     }
   );
 

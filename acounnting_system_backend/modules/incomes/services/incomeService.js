@@ -1,104 +1,196 @@
 'use strict';
 
+const { sequelize } = require('../../../models');
 const { Income } = require('../models/income.model');
-const eventBus = require('../../core/helpers/eventBus');
-const { Contact } = require('../../customer/models/contact.model');
+const { postJournalEntry } = require('../../gl/services/generalLedgerService');
+const { validateIncomeFields, validateCustomer } = require('../helpers/incomeValidator');
 const AppError = require('../../../utils/appError');
 
-async function createIncome(data) {
-  const { contactId } = data;
+async function createIncome(context, data) {
+  return await sequelize.transaction(async (t) => {
+    // 1️⃣ Validate fields
+    await validateIncomeFields(data, t);
 
-  if (contactId) {
-    const contact = await Contact.findByPk(contactId);
-    if (!contact || !contact.isCustomer) {
+    // 2️⃣ Validate customer/contact
+    await validateCustomer(data.contactId, t);
+
+    // 3️⃣ Create income
+    let income;
+    try {
+      income = await Income.create(
+        {
+          ...data,
+          businessId: context.businessId,
+          createdByUserId: context.userId
+        },
+        { transaction: t }
+      );
+    } catch (err) {
       throw new AppError({
         model: 'Income',
         action: 'create',
         statusCode: 400,
-        message: 'Selected contact is not a customer'
+        message: 'Failed to create income',
+        meta: err.errors || err.message
       });
     }
-  }
 
-  try {
-    const income = await Income.create(data);
-
-    // Emit event for GL
-    eventBus.emit('incomeCreated', income);
-
-    return income;
-  } catch (err) {
-    throw new AppError({
-      model: 'Income',
-      action: 'create',
-      statusCode: 400,
-      message: 'Failed to create income',
-      meta: err.errors || err.message
-    });
-  }
-}
-
-async function updateIncome(id, data) {
-  const income = await Income.findByPk(id);
-  if (!income) {
-    throw new AppError({
-      model: 'Income',
-      action: 'update',
-      statusCode: 404,
-      message: 'Income not found'
-    });
-  }
-
-  const oldIncome = { ...income.dataValues }; // copy for GL reversal
-
-  try {
-    await income.update(data);
-
-    // Emit event for GL to handle reversal and new entry
-    eventBus.emit('incomeUpdated', { oldIncome, newIncome: income });
+    // 4️⃣ Post GL entry
+    try {
+      await postJournalEntry(
+        {
+          date: income.date,
+          reference: `Income-${income.id}`,
+          description: income.notes || 'Income entry',
+          lines: [
+            { accountId: income.paymentAccountId, debit: income.amount, credit: 0 },
+            { accountId: income.revenueAccountId, debit: 0, credit: income.amount }
+          ]
+        },
+        t
+      );
+    } catch (err) {
+      throw new AppError({
+        model: 'Income',
+        action: 'create',
+        statusCode: 500,
+        message: 'Failed to post GL entry',
+        meta: err.errors || err.message
+      });
+    }
 
     return income;
-  } catch (err) {
-    throw new AppError({
-      model: 'Income',
-      action: 'update',
-      statusCode: 400,
-      message: 'Failed to update income',
-      meta: err.errors || err.message
-    });
-  }
+  });
 }
 
-async function deleteIncome(id) {
-  const income = await Income.findByPk(id);
-  if (!income) {
-    throw new AppError({
-      model: 'Income',
-      action: 'delete',
-      statusCode: 404,
-      message: 'Income not found'
-    });
-  }
+async function updateIncome(context, id, data) {
+  return await sequelize.transaction(async (t) => {
+    const income = await Income.findByPk(id, { transaction: t });
+    if (!income) {
+      throw new AppError({
+        model: 'Income',
+        action: 'update',
+        statusCode: 404,
+        message: 'Income not found'
+      });
+    }
 
-  try {
-    // Emit event for GL to post reversing entry
-    eventBus.emit('incomeDeleted', income);
+    // Validate updated fields
+    await validateIncomeFields(data, t);
 
-    await income.destroy();
-    return true;
-  } catch (err) {
-    throw new AppError({
-      model: 'Income',
-      action: 'delete',
-      statusCode: 500,
-      message: 'Failed to delete income',
-      meta: err.errors || err.message
-    });
-  }
+    // Validate customer/contact if changed
+    if (data.contactId) {
+      await validateCustomer(data.contactId, t);
+    }
+
+    const oldIncome = { ...income.dataValues };
+
+    try {
+      await income.update(
+        {
+          ...data,
+          updatedByUserId: context.userId
+        },
+        { transaction: t }
+      );
+    } catch (err) {
+      throw new AppError({
+        model: 'Income',
+        action: 'update',
+        statusCode: 400,
+        message: 'Failed to update income',
+        meta: err.errors || err.message
+      });
+    }
+
+    // Reverse old GL entry
+    await postJournalEntry(
+      {
+        date: new Date(),
+        reference: `Reversal-Income-${oldIncome.id}`,
+        description: 'Reversal of previous income entry',
+        lines: [
+          { accountId: oldIncome.paymentAccountId, debit: 0, credit: oldIncome.amount },
+          { accountId: oldIncome.revenueAccountId, debit: oldIncome.amount, credit: 0 }
+        ]
+      },
+      t
+    );
+
+    // Post new GL entry
+    await postJournalEntry(
+      {
+        date: income.date,
+        reference: `Income-${income.id}`,
+        description: income.notes || 'Income entry',
+        lines: [
+          { accountId: income.paymentAccountId, debit: income.amount, credit: 0 },
+          { accountId: income.revenueAccountId, debit: 0, credit: income.amount }
+        ]
+      },
+      t
+    );
+
+    return income;
+  });
+}
+
+async function deleteIncome(context, id) {
+  return await sequelize.transaction(async (t) => {
+    const income = await Income.findByPk(id, { transaction: t });
+    if (!income) {
+      throw new AppError({
+        model: 'Income',
+        action: 'delete',
+        statusCode: 404,
+        message: 'Income not found'
+      });
+    }
+
+    // Reverse GL entry
+    await postJournalEntry(
+      {
+        date: new Date(),
+        reference: `Reversal-Income-${income.id}`,
+        description: 'Reversal of deleted income entry',
+        lines: [
+          { accountId: income.paymentAccountId, debit: 0, credit: income.amount },
+          { accountId: income.revenueAccountId, debit: income.amount, credit: 0 }
+        ]
+      },
+      t
+    );
+
+    try {
+      await income.destroy({ transaction: t });
+      return true;
+    } catch (err) {
+      throw new AppError({
+        model: 'Income',
+        action: 'delete',
+        statusCode: 500,
+        message: 'Failed to delete income',
+        meta: err.errors || err.message
+      });
+    }
+  });
+}
+
+// Optional: paginated list
+async function getPaginatedIncomes({ businessId, page = 1, limit = 10, filters = {} }) {
+  const offset = (page - 1) * limit;
+  const result = await Income.findAndCountAll({
+    where: { businessId, ...filters },
+    limit,
+    offset,
+    order: [['createdAt', 'DESC']],
+  });
+  return result;
 }
 
 module.exports = {
   createIncome,
   updateIncome,
-  deleteIncome
+  deleteIncome,
+  getPaginatedIncomes
 };

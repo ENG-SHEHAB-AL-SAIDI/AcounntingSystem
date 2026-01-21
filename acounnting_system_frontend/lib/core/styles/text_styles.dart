@@ -51,7 +51,7 @@ class AppTextStyles {
     return TextStyle(
       fontSize: Responsivity.fontSizeScale(textHeader.fontSize),
       fontWeight: textHeader.fontWeight,
-      color: AppColors.highlightTextColor,
+      color: AppColors.ternaryColor,
       height: height,
     );
   }

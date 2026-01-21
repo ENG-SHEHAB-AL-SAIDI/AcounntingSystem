@@ -20,11 +20,11 @@ class PopUpAlertCard extends StatelessWidget {
           child: Hero(
               tag: "PupCard",
               child: Material(
-                color: AppColors.mainCardColor,
+                color: AppColors.mainColor,
                 elevation: 2,
                 shape: RoundedRectangleBorder(
                     side:
-                        BorderSide(width: 3, color: AppColors.inverseCardColor),
+                        BorderSide(width: 3, color: AppColors.secondaryColor),
                     borderRadius: BorderRadius.circular(32)),
                 child: SizedBox(
                     width: double.maxFinite,
@@ -40,7 +40,7 @@ class PopUpAlertCard extends StatelessWidget {
                                   style: AppTextStyles.secStyle(textHeader: AppTextHeaders.h3Normal,),),
                                 Icon(
                                   icon,
-                                  color: AppColors.inverseIconColor,
+                                  color: AppColors.secondaryColor,
                                 ),
                               ],
                             ),

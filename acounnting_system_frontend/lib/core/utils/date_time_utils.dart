@@ -78,10 +78,10 @@ class DateTimeUtils {
         return Theme(
             data: ThemeData().copyWith(
               colorScheme: ColorScheme.dark(
-                primary: AppColors.inverseCardColor,
-                onPrimary: AppColors.mainCardColor,
-                surface: AppColors.mainCardColor,
-                onSurface: AppColors.inverseCardColor,
+                primary: AppColors.secondaryColor,
+                onPrimary: AppColors.mainColor,
+                surface: AppColors.mainColor,
+                onSurface: AppColors.secondaryColor,
               ),
             ),
             child: child!);
@@ -109,10 +109,10 @@ class DateTimeUtils {
         return Theme(
             data: ThemeData().copyWith(
               colorScheme: ColorScheme.dark(
-                primary: AppColors.inverseCardColor,
-                onPrimary: AppColors.mainCardColor,
-                surface: AppColors.mainCardColor,
-                onSurface: AppColors.inverseCardColor,
+                primary: AppColors.secondaryColor,
+                onPrimary: AppColors.mainColor,
+                surface: AppColors.mainColor,
+                onSurface: AppColors.secondaryColor,
               ),
             ),
             child: child!);

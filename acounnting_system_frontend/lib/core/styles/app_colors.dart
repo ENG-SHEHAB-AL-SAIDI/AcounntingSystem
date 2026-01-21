@@ -4,24 +4,23 @@ class AppColors {
   static ButtonColors buttonColors =
       ButtonColors(color: Color(int.parse("FF0D3976", radix: 16)));
 
-  static Color mainTextColor = Colors.white;
-  static Color inverseMainTextColor = const Color(0xDF0D3976);
-  static Color secTextColor = const Color(0xFF0D3976);
-  static Color highlightTextColor = const Color(0x5F0D3976);
+
+
+
+  static Color mainTextColor =const Color(0xff111322);
+  static Color secTextColor =  Colors.white;
+  static Color ternaryTextColor = const Color(0xff0b192c);
+
+  static Color mainTextHighLightColor = const Color(0xffffe600);
 
   static Color linkTextColor = Colors.blueAccent;
-  static Color coverColor = const Color.fromRGBO(0, 191, 255, 0.25);
 
   // static Color backColor = const Color(0xFFF5F5F5);
-  static Color backColor = const Color(0xFFFFFFFF);
-  static Color tabBackColor = const Color.fromRGBO(235, 241, 253, 1);
-  static Color inverseTabBackColor = const Color(0xFF0D3976);
+  static Color mainColor = const Color(0xffffffff);
+  static Color secondaryColor = const Color(0xff111322);
+  static Color ternaryColor = const Color(0xff0B192C);
 
-  static Color mainIconColor =  const Color(0xFFFFFFFF);
-  static Color inverseIconColor = const Color(0xFF0D3976);
 
-  static Color mainCardColor =  const Color(0xFFFFFFFF);
-  static Color inverseCardColor = const Color(0xFF0D3976);
 }
 
 // structure for Buttons Coloring

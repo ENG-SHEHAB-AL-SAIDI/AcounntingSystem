@@ -13,7 +13,7 @@ void showSnakeBar({String? title, required String message,bool overWrite = false
     message,
     snackPosition: SnackPosition.TOP,
     overlayBlur: 0,
-    backgroundColor: AppColors.inverseCardColor.withValues(alpha: 0.8),
+    backgroundColor: AppColors.secondaryColor.withValues(alpha: 0.8),
     colorText: AppColors.mainTextColor,
     margin: const EdgeInsets.all(16),
     overlayColor: Colors.transparent,

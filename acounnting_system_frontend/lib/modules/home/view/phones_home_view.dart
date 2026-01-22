@@ -1,3 +1,5 @@
+import 'package:acounnting_system_frontend/modules/home/view/home_view_components/services_card.dart';
+
 import '../../../core/components/custom_text_v2.dart';
 import '../../../core/styles/app_colors.dart';
 import '../../../core/styles/text_styles.dart';
@@ -13,6 +15,7 @@ class PhonesHomeView extends GetView<HomeController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: controller.scaffoldKey,
       drawer: AppDrawer(),
       body: Stack(
         children: [
@@ -45,7 +48,7 @@ class PhonesHomeView extends GetView<HomeController> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     IconButton(
-                      onPressed: () {},
+                      onPressed: controller.openDrawer,
                       icon: Icon(Icons.menu, color: AppColors.secTextColor),
                     ),
                     CustomText(
@@ -55,7 +58,7 @@ class PhonesHomeView extends GetView<HomeController> {
                       ),
                     ),
                     IconButton(
-                      onPressed: () {},
+                      onPressed: controller.notificationRoute,
                       icon: Icon(
                         Icons.notifications_outlined,
                         color: AppColors.secTextColor,
@@ -66,7 +69,7 @@ class PhonesHomeView extends GetView<HomeController> {
               ),
               Expanded(
                 child: Container(
-                  padding: EdgeInsets.only(top: 16),
+                  padding: EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: AppColors.mainColor,
                     borderRadius: BorderRadius.only(
@@ -74,12 +77,33 @@ class PhonesHomeView extends GetView<HomeController> {
                       topRight: Radius.circular(75),
                     ),
                   ),
-                  child: Center(
-                    child: CustomText(
-                      'الرئيسية',
-                      style: AppTextStyles.secStyle(textHeader: AppTextHeaders.h1Bold),
+                  child: RefreshIndicator(
+                    onRefresh: () async {},
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          for (int i = 0; i < 7; i += 2) ...[
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                ServicesCard(
+                                  text: "الايرادت",
+                                  textStyle: AppTextStyles.ternaryStyle(),
+                                  backgroundColor: AppColors.ternaryColor,
+                                ),
+                                ServicesCard(
+                                  text: "الايرادت",
+                                  textStyle: AppTextStyles.ternaryStyle(),
+                                  backgroundColor: AppColors.ternaryColor,
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 16,)
+                          ],
+                        ],
+                      ),
                     ),
-                  )
+                  ),
                 ),
               ),
             ],
@@ -110,63 +134,6 @@ class PhonesHomeView extends GetView<HomeController> {
           ],
         );
       }),
-    );
-  }
-
-  Widget _buildBody(int index) {
-    switch (index) {
-      case 0:
-        return _overview();
-      case 1:
-        return const Center(child: Text('Incomes Module'));
-      case 2:
-        return const Center(child: Text('Contacts Module'));
-      case 3:
-        return const Center(child: Text('Settings'));
-      default:
-        return const SizedBox();
-    }
-  }
-
-  Widget _overview() {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: GridView.count(
-        crossAxisCount: 2,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        children: const [
-          _DashboardCard(title: 'Today Income', value: '0'),
-          _DashboardCard(title: 'This Month', value: '0'),
-          _DashboardCard(title: 'Cash Balance', value: '0'),
-          _DashboardCard(title: 'Bank Balance', value: '0'),
-        ],
-      ),
-    );
-  }
-}
-
-class _DashboardCard extends StatelessWidget {
-  final String title;
-  final String value;
-
-  const _DashboardCard({required this.title, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: Theme.of(context).textTheme.bodyMedium),
-            const Spacer(),
-            Text(value, style: Theme.of(context).textTheme.headlineMedium),
-          ],
-        ),
-      ),
     );
   }
 }

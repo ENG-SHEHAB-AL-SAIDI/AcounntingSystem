@@ -1,10 +1,12 @@
 import 'package:acounnting_system_frontend/modules/home/controllers/home_controller.dart';
 import 'package:acounnting_system_frontend/modules/login/controllers/login_controller.dart';
+import 'package:acounnting_system_frontend/modules/notification/controllers/notification_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'modules/home/view/home_view_loader.dart';
 import 'modules/login/view/login_view_loader.dart';
+import 'modules/notification/view/phones_notification_view.dart';
 
 class AppRoutes {
   static final routes = [
@@ -31,7 +33,20 @@ class AppRoutes {
     ),
 
 
-    // Add more routes here
+    ////////////////////////////////////////////
+    ////         phone routes              ////
+    //////////////////////////////////////////
+
+
+    GetPage(
+      name: '/phoneNotification',
+      page: () =>  PhoneNotificationView(),
+      binding: BindingsBuilder((){
+        Get.put<NotificationController>(NotificationController());
+      }),
+    ),
+
+
   ];
 }
 

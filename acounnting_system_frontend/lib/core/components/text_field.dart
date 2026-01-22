@@ -35,7 +35,7 @@ class CustomTextFormField extends StatelessWidget {
     this.expands = false,
   }) {
     labelStyle ??=
-        AppTextStyles.highlightStyle(textHeader: AppTextHeaders.h3Normal);
+        AppTextStyles.ternaryStyle(textHeader: AppTextHeaders.h3Normal);
   }
 
   String? initialValue;

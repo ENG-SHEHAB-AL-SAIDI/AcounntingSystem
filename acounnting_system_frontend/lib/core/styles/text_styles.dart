@@ -46,15 +46,17 @@ class AppTextStyles {
     );
   }
 
-  static TextStyle highlightStyle({TextHeaders? textHeader, double? height}) {
+
+  static TextStyle ternaryStyle({TextHeaders? textHeader, double? height}) {
     textHeader ??= AppTextHeaders.h3Normal;
     return TextStyle(
       fontSize: Responsivity.fontSizeScale(textHeader.fontSize),
       fontWeight: textHeader.fontWeight,
-      color: AppColors.ternaryColor,
+      color: AppColors.ternaryTextColor,
       height: height,
     );
   }
+
 
   static TextStyle linkStyle({TextHeaders? textHeader, double? height}) {
     textHeader ??= AppTextHeaders.h3Normal;

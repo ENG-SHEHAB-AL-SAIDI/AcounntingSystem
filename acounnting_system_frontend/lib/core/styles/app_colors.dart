@@ -9,16 +9,16 @@ class AppColors {
 
   static Color mainTextColor =const Color(0xff111322);
   static Color secTextColor =  Colors.white;
-  static Color ternaryTextColor = const Color(0xff0b192c);
+  static Color ternaryTextColor = const Color(0xff111322);
 
   static Color mainTextHighLightColor = const Color(0xffffe600);
 
   static Color linkTextColor = Colors.blueAccent;
 
   // static Color backColor = const Color(0xFFF5F5F5);
-  static Color mainColor = const Color(0xffffffff);
+  static Color mainColor = const Color(0xffeaebf4);
   static Color secondaryColor = const Color(0xff111322);
-  static Color ternaryColor = const Color(0xff0B192C);
+  static Color ternaryColor = const Color(0xffffffff);
 
 
 }

@@ -16,8 +16,4 @@ class HomeController extends GetxController {
     selectedIndex.value = index;
   }
 
-
-  void notificationRoute() {
-    Get.toNamed("phoneNotification");
-  }
 }
